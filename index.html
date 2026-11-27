@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cisco NCS IOS-XR Third-Party Client MOP Generator</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-alt: #162032;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --code-bg: #090d16;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header h1 span.badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.22fr 0.78fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1120px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 13px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group.span-2 {
+      grid-column: span 2;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 640px) {
+      .form-group.span-2 {
+        grid-column: span 1;
+      }
+    }
+
+    label {
+      font-size: 0.79rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    input, textarea, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 11px;
+      border-radius: 7px;
+      font-size: 0.86rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 74px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+    }
+
+    .hint {
+      font-size: 0.71rem;
+      color: var(--muted);
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 7px;
+      border: none;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background: #7dd3fc;
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #06281e;
+    }
+
+    .btn-success:hover {
+      background: #34d399;
+    }
+
+    .btn-generate {
+      background: linear-gradient(135deg, #38bdf8, #10b981);
+      color: #06281e;
+      font-weight: 700;
+      padding: 8px 16px;
+    }
+
+    .btn-generate:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 0.76rem;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 5px 10px;
+      font-size: 0.75rem;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    .service-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .service-block {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .service-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .service-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .service-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #fff;
+    }
+
+    .service-tag span.pill {
+      background: var(--accent);
+      color: #0f172a;
+      font-size: 0.72rem;
+      padding: 2px 9px;
+      border-radius: 5px;
+      font-weight: 800;
+    }
+
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--muted);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .status-generated {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .section-divider {
+      grid-column: 1 / -1;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-top: 4px;
+      padding-bottom: 3px;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .combo-input {
+      display: flex;
+      gap: 6px;
+    }
+
+    .combo-input select {
+      flex: 0 0 52%;
+      font-size: 0.8rem;
+    }
+
+    .combo-input input {
+      flex: 1;
+    }
+
+    .output-sticky {
+      position: sticky;
+      top: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .tab.active {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+
+    .tab.tab-rollback.active {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    pre.code-output {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.81rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      min-height: 220px;
+      max-height: 76vh;
+      overflow-y: auto;
+      white-space: pre;
+    }
+
+    .empty-output-msg {
+      color: var(--muted);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.85rem;
+      white-space: normal;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--success);
+      color: #052e16;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>
+        Cisco NCS IOS-XR MOP Generator
+      </h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="addAllSixEmptyServices()">+ Add All 6 Services (Empty)</button>
+        <button class="btn btn-secondary" onclick="loadSampleData()">Load Sample</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Reset All</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT COLUMN: INPUT PARAMETERS -->
+      <div>
+        <!-- 1. Global Parameters -->
+        <div class="card">
+          <div class="card-title">
+            <span>1. Global Router, ASN & Prefix-Set Parameters</span>
+            <button class="btn btn-generate btn-sm" onclick="generatePrefixSetOnly()">Generate Prefix-Set</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Local ASN *</label>
+              <input type="text" id="localAsn" placeholder="e.g. 133443" />
+            </div>
+            <div class="form-group">
+              <label>Remote ASN *</label>
+              <input type="text" id="remoteAsn" placeholder="e.g. 65372" />
+            </div>
+            <div class="form-group">
+              <label>Base Physical Interface *</label>
+              <input type="text" id="physInterface" placeholder="e.g. HundredGigE0/0/0/29" oninput="onGlobalChange()" />
+            </div>
+            <div class="form-group">
+              <label>Base VLAN *</label>
+              <input type="text" id="baseVlan" placeholder="e.g. 3541" oninput="onBaseVlanChange()" />
+            </div>
+            <div class="form-group span-2">
+              <label>Prefix-Set Name *</label>
+              <input type="text" id="prefixSetName" placeholder="e.g. sph-dot-net-prefix" />
+            </div>
+            <div class="form-group full">
+              <label>Prefix-Set IPv4 Prefixes (One per line or comma-separated) *</label>
+              <textarea id="prefixList" placeholder="103.229.85.148/30&#10;151.158.121.8/30&#10;151.158.121.16/29"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Service Blocks -->
+        <div class="card">
+          <div class="card-title">
+            <span>2. Service Configuration (INT, GGC, FNA, MCDN, BCDN, BDIX)</span>
+            <button class="btn btn-generate btn-sm" onclick="generateAllServices()">Generate All Services</button>
+          </div>
+
+          <div style="margin-bottom: 10px; font-size: 0.8rem; color: var(--muted);">
+            Click to add services one by one, fill inputs, then click <b>Generate</b> on each service:
+          </div>
+          <div class="service-chips">
+            <button class="chip" onclick="addService('INT')">+ INT</button>
+            <button class="chip" onclick="addService('GGC')">+ GGC</button>
+            <button class="chip" onclick="addService('FNA')">+ FNA</button>
+            <button class="chip" onclick="addService('MCDN')">+ MCDN</button>
+            <button class="chip" onclick="addService('BCDN')">+ BCDN</button>
+            <button class="chip" onclick="addService('BDIX')">+ BDIX</button>
+          </div>
+
+          <div id="servicesContainer"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: GENERATED SCRIPT OUTPUT -->
+      <div class="output-sticky">
+        <div class="card">
+          <div class="card-title">
+            <span>Generated Cisco IOS-XR Script</span>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="copyOutput()">Copy</button>
+              <button class="btn btn-success" onclick="downloadMOP()">Download</button>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <button class="tab active" id="tabConfigOnly" onclick="switchTab('config')">Config Script Only</button>
+            <button class="tab tab-rollback" id="tabRollback" onclick="switchTab('rollback')">Rollback Script</button>
+          </div>
+
+          <pre class="code-output" id="mopOutput"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    const ROUTE_POLICY_OUT_OPTIONS = [
+      'default-route-only',
+      'ggc-for-client',
+      'fna-for-client',
+      'cdn-for-client',
+      'bcdn-for-client',
+      'bdix-for-client',
+      'full-route-out'
+    ];
+
+    const SERVICE_TEMPLATES = {
+      INT: {
+        type: 'INT',
+        policyMapIn: '',
+        policyMapOut: '',
+        policeRateIn: '',
+        policeRateOut: '',
+        burstBytes: '50000',
+        subInterface: '',
+        vlan: '',
+        vrf: '',
+        intDescription: '',
+        bgpDescription: '',
+        localAddress: '',
+        subnetMask: '',
+        neighborAddress: '',
+        localPref: '',
+        routePolicyIn: '',
+        routePolicyOut: ''
+      },
+      GGC: {
+        type: 'GGC',
+        policyMapIn: '',
+        policyMapOut: '',
+        policeRateIn: '',
+        policeRateOut: '',
+        burstBytes: '50000',
+        subInterface: '',
+        vlan: '',
+        vrf: 'GGC-RT',
+        intDescription: '',
+        bgpDescription: '',
+        localAddress: '',
+        subnetMask: '',
+        neighborAddress: '',
+        localPref: '',
+        routePolicyIn: '',
+        routePolicyOut: ''
+      },
+      FNA: {
+        type: 'FNA',
+        policyMapIn: '',
+        policyMapOut: '',
+        policeRateIn: '',
+        policeRateOut: '',
+        burstBytes: '50000',
+        subInterface: '',
+        vlan: '',
+        vrf: 'FNA-RT',
+        intDescription: '',
+        bgpDescription: '',
+        localAddress: '',
+        subnetMask: '',
+        neighborAddress: '',
+        localPref: '',
+        routePolicyIn: '',
+        routePolicyOut: ''
+      },
+      MCDN: {
+        type: 'MCDN',
+        policyMapIn: '',
+        policyMapOut: '',
+        policeRateIn: '',
+        policeRateOut: '',
+        burstBytes: '50000',
+        subInterface: '',
+        vlan: '',
+        vrf: 'CDN-RT',
+        intDescription: '',
+        bgpDescription: '',
+        localAddress: '',
+        subnetMask: '',
+        neighborAddress: '',
+        localPref: '',
+        routePolicyIn: '',
+        routePolicyOut: ''
+      },
+      BCDN: {
+        type: 'BCDN',
+        policyMapIn: '',
+        policyMapOut: '',
+        policeRateIn: '',
+        policeRateOut: '',
+        burstBytes: '50000',
+        subInterface: '',
+        vlan: '',
+        vrf: 'BCDN-RT',
+        intDescription: '',
+        bgpDescription: '',
+        localAddress: '',
+        subnetMask: '',
+        neighborAddress: '',
+        localPref: '',
+        routePolicyIn: '',
+        routePolicyOut: ''
+      },
+      BDIX: {
+        type: 'BDIX',
+        policyMapIn: '',
+        policyMapOut: '',
+        policeRateIn: '',
+        policeRateOut: '',
+        burstBytes: '50000',
+        subInterface: '',
+        vlan: '',
+        vrf: 'BDIX-RT',
+        intDescription: '',
+        bgpDescription: '',
+        localAddress: '',
+        subnetMask: '',
+        neighborAddress: '',
+        localPref: '',
+        routePolicyIn: '',
+        routePolicyOut: ''
+      }
+    };
+
+    const SAMPLE_DATA = {
+      INT: {
+        type: 'INT',
+        policyMapIn: 'sph-dot-net-int-in',
+        policyMapOut: 'sph-dot-net-int-out',
+        policeRateIn: '510',
+        policeRateOut: '510',
+        burstBytes: '50000',
+        subInterface: 'HundredGigE0/0/0/29.3541',
+        vlan: '3541',
+        vrf: '',
+        intDescription: '*ORANG-DHA-23260_P-C01870-14260-Comilla-Online-sph-dot-net-int-3541*',
+        bgpDescription: '*Comilla-Online-sph-dot-net-int-3541*',
+        localAddress: '172.21.164.141',
+        subnetMask: '255.255.255.252',
+        neighborAddress: '172.21.164.142',
+        localPref: '150',
+        routePolicyIn: 'sph-dot-net-int-in',
+        routePolicyOut: 'default-route-only'
+      },
+      GGC: {
+        type: 'GGC',
+        policyMapIn: 'sph-dot-net-ggc-in',
+        policyMapOut: 'sph-dot-net-ggc-out',
+        policeRateIn: '950',
+        policeRateOut: '950',
+        burstBytes: '50000',
+        subInterface: 'HundredGigE0/0/0/29.3542',
+        vlan: '3542',
+        vrf: 'GGC-RT',
+        intDescription: '*ORANG-DHA-23261_P-C01870-14260-Comilla-Online-sph-dot-net-snm-1-3542*',
+        bgpDescription: '*Comilla-Online-sph-dot-net-ggc-3542*',
+        localAddress: '172.21.164.145',
+        subnetMask: '255.255.255.252',
+        neighborAddress: '172.21.164.146',
+        localPref: '900',
+        routePolicyIn: 'sph-dot-net-ggc-in',
+        routePolicyOut: 'ggc-for-client'
+      },
+      FNA: {
+        type: 'FNA',
+        policyMapIn: 'sph-dot-net-fna-in',
+        policyMapOut: 'sph-dot-net-fna-out',
+        policeRateIn: '1520',
+        policeRateOut: '1520',
+        burstBytes: '50000',
+        subInterface: 'HundredGigE0/0/0/29.3543',
+        vlan: '3543',
+        vrf: 'FNA-RT',
+        intDescription: '*ORANG-DHA-23263_P-C01870-14260-Comilla-Online-sph-dot-net-snm-2-3543*',
+        bgpDescription: '*Comilla-Online-sph-dot-net-fna-3543*',
+        localAddress: '172.21.164.149',
+        subnetMask: '255.255.255.252',
+        neighborAddress: '172.21.164.150',
+        localPref: '1100',
+        routePolicyIn: 'sph-dot-net-fna-in',
+        routePolicyOut: 'fna-for-client'
+      },
+      MCDN: {
+        type: 'MCDN',
+        policyMapIn: 'sph-dot-net-mcdn-in',
+        policyMapOut: 'sph-dot-net-mcdn-out',
+        policeRateIn: '160',
+        policeRateOut: '160',
+        burstBytes: '50000',
+        subInterface: 'HundredGigE0/0/0/29.3544',
+        vlan: '3544',
+        vrf: 'CDN-RT',
+        intDescription: '*ORANG-DHA-23264_P-C01870-14260-Comilla-Online-sph-dot-net-snm-3-3544*',
+        bgpDescription: '*Comilla-Online-sph-dot-net-mcdn-3544*',
+        localAddress: '172.21.164.153',
+        subnetMask: '255.255.255.252',
+        neighborAddress: '172.21.164.154',
+        localPref: '1300',
+        routePolicyIn: 'sph-dot-net-mcdn-in',
+        routePolicyOut: 'cdn-for-client'
+      },
+      BCDN: {
+        type: 'BCDN',
+        policyMapIn: 'sph-dot-net-bcdn-in',
+        policyMapOut: 'sph-dot-net-bcdn-out',
+        policeRateIn: '200',
+        policeRateOut: '200',
+        burstBytes: '50000',
+        subInterface: 'HundredGigE0/0/0/29.3544',
+        vlan: '3544',
+        vrf: 'BCDN-RT',
+        intDescription: '*ORANG-DHA-23264_P-C01870-14260-Comilla-Online-sph-dot-net-snm-4-3544*',
+        bgpDescription: '*Comilla-Online-sph-dot-net-bcdn-3544*',
+        localAddress: '172.21.164.151',
+        subnetMask: '255.255.255.252',
+        neighborAddress: '172.21.164.154',
+        localPref: '1500',
+        routePolicyIn: 'sph-dot-net-bcdn-in',
+        routePolicyOut: 'bcdn-for-client'
+      },
+      BDIX: {
+        type: 'BDIX',
+        policyMapIn: 'sph-dot-net-bdix-in',
+        policyMapOut: 'sph-dot-net-bdix-out',
+        policeRateIn: '310',
+        policeRateOut: '310',
+        burstBytes: '50000',
+        subInterface: 'HundredGigE0/0/0/29.3545',
+        vlan: '3545',
+        vrf: 'BDIX-RT',
+        intDescription: '*ORANG-DHA-23265_P-C01870-14260-Comilla-Online-sph-dot-net-bdix-3545*',
+        bgpDescription: '*Comilla-Online-sph-dot-net-bdix-3545*',
+        localAddress: '172.21.164.157',
+        subnetMask: '255.255.255.252',
+        neighborAddress: '172.21.164.158',
+        localPref: '450',
+        routePolicyIn: 'sph-dot-net-bdix-in',
+        routePolicyOut: 'bdix-for-client'
+      }
+    };
+
+    let services = [];
+    let prefixSetGenerated = false;
+    let currentTab = 'config';
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function hasAnyGenerated() {
+      return prefixSetGenerated || services.some(s => s.generated);
+    }
+
+    function addService(presetKey) {
+      const template = SERVICE_TEMPLATES[presetKey] || SERVICE_TEMPLATES.INT;
+      const id = Date.now() + Math.random();
+      const phys = document.getElementById('physInterface').value.trim();
+      const baseVlanRaw = document.getElementById('baseVlan').value.trim();
+      const baseVlanVal = parseInt(baseVlanRaw, 10);
+
+      let vlan = '';
+      if (baseVlanRaw && !isNaN(baseVlanVal)) {
+        vlan = String(baseVlanVal + services.length);
+      }
+
+      let subInterface = '';
+      if (phys && vlan) {
+        subInterface = `${phys}.${vlan}`;
+      } else if (phys) {
+        subInterface = phys;
+      }
+
+      services.push({
+        ...template,
+        id,
+        vlan,
+        subInterface,
+        generated: false
+      });
+      renderServices();
+    }
+
+    function addAllSixEmptyServices() {
+      const keys = ['INT', 'GGC', 'FNA', 'MCDN', 'BCDN', 'BDIX'];
+      const phys = document.getElementById('physInterface').value.trim();
+      const baseVlanRaw = document.getElementById('baseVlan').value.trim();
+      const baseVlanVal = parseInt(baseVlanRaw, 10);
+
+      services = keys.map((k, idx) => {
+        let vlan = '';
+        if (baseVlanRaw && !isNaN(baseVlanVal)) {
+          vlan = String(baseVlanVal + idx);
+        }
+        let subInterface = '';
+        if (phys && vlan) {
+          subInterface = `${phys}.${vlan}`;
+        } else if (phys) {
+          subInterface = phys;
+        }
+        return {
+          ...SERVICE_TEMPLATES[k],
+          id: Date.now() + idx + Math.random(),
+          vlan,
+          subInterface,
+          generated: false
+        };
+      });
+
+      renderServices();
+    }
+
+    function removeService(id) {
+      services = services.filter(s => s.id !== id);
+      renderServices();
+      renderOutput();
+    }
+
+    function onGlobalChange() {
+      const phys = document.getElementById('physInterface').value.trim();
+      services.forEach(svc => {
+        if (phys && svc.vlan) {
+          svc.subInterface = `${phys}.${svc.vlan}`;
+        } else if (phys) {
+          svc.subInterface = phys;
+        }
+      });
+      renderServices();
+    }
+
+    function onBaseVlanChange() {
+      const baseVlanRaw = document.getElementById('baseVlan').value.trim();
+      const baseVlanVal = parseInt(baseVlanRaw, 10);
+      const phys = document.getElementById('physInterface').value.trim();
+      if (baseVlanRaw && !isNaN(baseVlanVal)) {
+        services.forEach((svc, idx) => {
+          svc.vlan = String(baseVlanVal + idx);
+          svc.subInterface = phys ? `${phys}.${svc.vlan}` : '';
+        });
+        renderServices();
+      }
+    }
+
+    function updateServiceField(id, field, value) {
+      const svc = services.find(s => s.id === id);
+      if (!svc) return;
+      svc[field] = value;
+
+      if (field === 'vlan') {
+        const phys = document.getElementById('physInterface').value.trim();
+        if (phys && value.trim()) {
+          svc.subInterface = `${phys}.${value.trim()}`;
+        } else if (phys) {
+          svc.subInterface = phys;
+        }
+        const subInput = document.getElementById(`subIf_${id}`);
+        if (subInput) subInput.value = svc.subInterface;
+      }
+
+      if (field === 'subInterface') {
+        const dotParts = value.trim().split('.');
+        if (dotParts.length > 1) {
+          svc.vlan = dotParts[dotParts.length - 1];
+          const vlanInput = document.getElementById(`vlan_${id}`);
+          if (vlanInput) vlanInput.value = svc.vlan;
+        }
+      }
+
+      if (field === 'routePolicyOut') {
+        const sel = document.getElementById(`selRpOut_${id}`);
+        if (sel) {
+          sel.value = ROUTE_POLICY_OUT_OPTIONS.includes(value) ? value : '';
+        }
+      }
+    }
+
+    function onSelectRoutePolicyOut(id, selectedVal) {
+      if (!selectedVal) return;
+      const svc = services.find(s => s.id === id);
+      if (!svc) return;
+      svc.routePolicyOut = selectedVal;
+      const inp = document.getElementById(`inpRpOut_${id}`);
+      if (inp) inp.value = selectedVal;
+    }
+
+    function buildRoutePolicyOutOptions(currentVal) {
+      const hasMatch = ROUTE_POLICY_OUT_OPTIONS.includes(currentVal);
+      let opts = `<option value="" ${!hasMatch ? 'selected' : ''}>-- Select Policy --</option>`;
+      opts += ROUTE_POLICY_OUT_OPTIONS.map(opt =>
+        `<option value="${escapeHtml(opt)}" ${opt === currentVal ? 'selected' : ''}>${escapeHtml(opt)}</option>`
+      ).join('');
+      return opts;
+    }
+
+    function generatePrefixSetOnly() {
+      prefixSetGenerated = true;
+      renderOutput();
+      showToast('Prefix-Set script generated!');
+    }
+
+    function generateSingleService(id) {
+      const svc = services.find(s => s.id === id);
+      if (!svc) return;
+      svc.generated = true;
+      prefixSetGenerated = true;
+      renderServices();
+      renderOutput();
+      showToast(`${svc.type} service script generated!`);
+    }
+
+    function generateAllServices() {
+      prefixSetGenerated = true;
+      services.forEach(s => { s.generated = true; });
+      renderServices();
+      renderOutput();
+      showToast('All scripts generated!');
+    }
+
+    function renderServices() {
+      const container = document.getElementById('servicesContainer');
+      if (services.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 24px; color: var(--muted); border: 1px dashed var(--border); border-radius: 8px; font-size: 0.85rem;">No service blocks added yet. Click <b>+ INT</b>, <b>+ GGC</b>, <b>+ FNA</b>, <b>+ MCDN</b>, <b>+ BCDN</b>, <b>+ BDIX</b> above to add one by one.</div>`;
+        return;
+      }
+
+      container.innerHTML = services.map((svc, idx) => `
+        <div class="service-block">
+          <div class="service-header">
+            <div class="service-tag">
+              <span class="pill">${escapeHtml(svc.type)}</span>
+              <span>Service #${idx + 1}</span>
+              <span class="status-badge ${svc.generated ? 'status-generated' : 'status-pending'}">
+                ${svc.generated ? 'Generated' : 'Not Generated'}
+              </span>
+            </div>
+            <div class="service-header-actions">
+              <button class="btn btn-generate btn-sm" onclick="generateSingleService(${svc.id})">
+                ${svc.generated ? 'Update / Generate' : 'Generate ' + escapeHtml(svc.type)}
+              </button>
+              <button class="btn btn-danger" onclick="removeService(${svc.id})">Remove</button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <!-- Policy-Map & Rate (In & Out Separate) -->
+            <div class="section-divider">Policy-Map &amp; Police/Shape Rate (In &amp; Out)</div>
+            <div class="form-group">
+              <label>Policy-Map IN Name *</label>
+              <input type="text" value="${escapeHtml(svc.policyMapIn)}" placeholder="e.g. sph-dot-net-int-in" oninput="updateServiceField(${svc.id}, 'policyMapIn', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>Police Rate IN (Mbps) *</label>
+              <input type="number" value="${escapeHtml(svc.policeRateIn)}" placeholder="e.g. 510" oninput="updateServiceField(${svc.id}, 'policeRateIn', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>Policy-Map OUT Name *</label>
+              <input type="text" value="${escapeHtml(svc.policyMapOut)}" placeholder="e.g. sph-dot-net-int-out" oninput="updateServiceField(${svc.id}, 'policyMapOut', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>Shape Rate OUT (Mbps) *</label>
+              <input type="number" value="${escapeHtml(svc.policeRateOut)}" placeholder="e.g. 510" oninput="updateServiceField(${svc.id}, 'policeRateOut', this.value)" />
+              <span class="hint">Auto-converts to bps in shape average</span>
+            </div>
+
+            <!-- Interface, VLAN, VRF & Manual Descriptions -->
+            <div class="section-divider">Interface, IP Addressing &amp; Manual Description</div>
+            <div class="form-group">
+              <label>Sub-Interface *</label>
+              <input type="text" id="subIf_${svc.id}" value="${escapeHtml(svc.subInterface)}" placeholder="e.g. HundredGigE0/0/0/29.3541" oninput="updateServiceField(${svc.id}, 'subInterface', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>VLAN (dot1q) *</label>
+              <input type="text" id="vlan_${svc.id}" value="${escapeHtml(svc.vlan)}" placeholder="e.g. 3541" oninput="updateServiceField(${svc.id}, 'vlan', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>VRF Name (Empty = Global Table)</label>
+              <input type="text" value="${escapeHtml(svc.vrf)}" placeholder="e.g. GGC-RT (blank for INT)" oninput="updateServiceField(${svc.id}, 'vrf', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>Local Address (Interface IPv4) *</label>
+              <input type="text" value="${escapeHtml(svc.localAddress)}" placeholder="e.g. 172.21.164.141" oninput="updateServiceField(${svc.id}, 'localAddress', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>Subnet Mask *</label>
+              <input type="text" value="${escapeHtml(svc.subnetMask)}" placeholder="e.g. 255.255.255.252" oninput="updateServiceField(${svc.id}, 'subnetMask', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>Neighbor Address (BGP Peer IP) *</label>
+              <input type="text" value="${escapeHtml(svc.neighborAddress)}" placeholder="e.g. 172.21.164.142" oninput="updateServiceField(${svc.id}, 'neighborAddress', this.value)" />
+            </div>
+            <div class="form-group full">
+              <label>Interface Description (Manual — include NTTN ID &amp; Circuit ID) *</label>
+              <input type="text" value="${escapeHtml(svc.intDescription)}" placeholder="*ORANG-DHA-23260_P-C01870-14260-Comilla-Online-sph-dot-net-int-3541*" oninput="updateServiceField(${svc.id}, 'intDescription', this.value)" />
+            </div>
+            <div class="form-group full">
+              <label>BGP Neighbor Description (Manual) *</label>
+              <input type="text" value="${escapeHtml(svc.bgpDescription)}" placeholder="*Comilla-Online-sph-dot-net-int-3541*" oninput="updateServiceField(${svc.id}, 'bgpDescription', this.value)" />
+            </div>
+
+            <!-- BGP & Route-Policy In/Out -->
+            <div class="section-divider">BGP Local-Preference &amp; Route-Policy (IN / OUT)</div>
+            <div class="form-group">
+              <label>Local-Preference *</label>
+              <input type="number" value="${escapeHtml(svc.localPref)}" placeholder="e.g. 150" oninput="updateServiceField(${svc.id}, 'localPref', this.value)" />
+            </div>
+            <div class="form-group">
+              <label>Route-Policy IN *</label>
+              <input type="text" value="${escapeHtml(svc.routePolicyIn)}" placeholder="e.g. sph-dot-net-int-in" oninput="updateServiceField(${svc.id}, 'routePolicyIn', this.value)" />
+            </div>
+            <div class="form-group span-2">
+              <label>Route-Policy OUT (Select or Type) *</label>
+              <div class="combo-input">
+                <select id="selRpOut_${svc.id}" onchange="onSelectRoutePolicyOut(${svc.id}, this.value)">
+                  ${buildRoutePolicyOutOptions(svc.routePolicyOut)}
+                </select>
+                <input type="text" id="inpRpOut_${svc.id}" value="${escapeHtml(svc.routePolicyOut)}" placeholder="e.g. default-route-only" oninput="updateServiceField(${svc.id}, 'routePolicyOut', this.value)" />
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderOutput() {
+      const outputEl = document.getElementById('mopOutput');
+      const generatedServices = services.filter(s => s.generated);
+
+      if (!prefixSetGenerated && generatedServices.length === 0) {
+        outputEl.innerHTML = `<div class="empty-output-msg">Output box is empty.<br><br>Fill in the parameters on the left and click <b>Generate</b> on each service to generate the Cisco IOS-XR script.</div>`;
+        return;
+      }
+
+      const localAsn = document.getElementById('localAsn').value.trim() || '<LOCAL_ASN>';
+      const remoteAsn = document.getElementById('remoteAsn').value.trim() || '<REMOTE_ASN>';
+      const physInt = document.getElementById('physInterface').value.trim() || '<INTERFACE>';
+      const prefixSetName = document.getElementById('prefixSetName').value.trim() || '<PREFIX_SET_NAME>';
+
+      const rawPrefixes = document.getElementById('prefixList').value
+        .split(/[\n,]+/)
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      const prefixLines = rawPrefixes.length > 0
+        ? rawPrefixes.map((p, i) => `  ${p}${i < rawPrefixes.length - 1 ? ',' : ''}`).join('\n')
+        : '  <CLIENT_PREFIX/MASK>';
+
+      let configBlocks = [];
+      let rollbackBgpBlocks = [];
+      let rollbackInterfaceLines = [];
+      let rollbackRoutePolicyLines = [];
+      let rollbackPolicyMapLines = [];
+
+      const uniqueInterfaces = new Set();
+      const uniquePolicyMaps = new Set();
+
+      // 1. Prefix-set block
+      if (prefixSetGenerated) {
+        configBlocks.push(`prefix-set ${prefixSetName}
+${prefixLines}
+end-set
+!`);
+      }
+
+      // 2. Generated service blocks
+      generatedServices.forEach((svc) => {
+        const polIn = (svc.policyMapIn || `<POLICY_MAP_IN>`).trim();
+        const polOut = (svc.policyMapOut || `<POLICY_MAP_OUT>`).trim();
+        const rateInVal = svc.policeRateIn.trim() ? svc.policeRateIn.trim() : '<RATE_IN>';
+        const rateOutNum = parseInt(svc.policeRateOut.trim(), 10);
+        const shapeOutVal = !isNaN(rateOutNum) ? String(rateOutNum * 1000000) : '<RATE_OUT_BPS>';
+        const burstBytes = (svc.burstBytes || '50000').trim();
+
+        const vlan = (svc.vlan || '<VLAN>').trim();
+        const subIf = (svc.subInterface || (svc.vlan ? `${physInt}.${vlan}` : '<SUB_INTERFACE>')).trim();
+        const vrf = (svc.vrf || '').trim();
+        const intDesc = (svc.intDescription || '').trim();
+        const bgpDesc = (svc.bgpDescription || '').trim();
+
+        const localIp = (svc.localAddress || '<LOCAL_IP>').trim();
+        const mask = (svc.subnetMask || '<SUBNET_MASK>').trim();
+        const peerIp = (svc.neighborAddress || '<NEIGHBOR_IP>').trim();
+
+        const lp = (svc.localPref || '<LOCAL_PREF>').trim();
+        const rpIn = (svc.routePolicyIn || '<ROUTE_POLICY_IN>').trim();
+        const rpOut = (svc.routePolicyOut || '<ROUTE_POLICY_OUT>').trim();
+
+        const vrfIntLine = vrf ? `\n vrf ${vrf}` : '';
+        const intDescLine = intDesc ? `\n description ${intDesc}` : '';
+        const bgpDescLine = bgpDesc ? `\n  description ${bgpDesc}` : '';
+
+        let bgpBlock = '';
+        if (vrf) {
+          bgpBlock = `router bgp ${localAsn}
+  address-family ipv4 unicast
+  !
+  vrf ${vrf}
+   address-family ipv4 unicast
+   !
+ neighbor ${peerIp}
+  remote-as ${remoteAsn}${bgpDescLine}
+  address-family ipv4 unicast
+   send-community-ebgp
+   route-policy ${rpIn} in
+   route-policy ${rpOut} out
+   soft-reconfiguration inbound always
+  !
+ !`;
+          rollbackBgpBlocks.push(`router bgp ${localAsn}\n vrf ${vrf}\n  no neighbor ${peerIp}\n !\n!`);
+        } else {
+          bgpBlock = `router bgp ${localAsn}
+ neighbor ${peerIp}
+  remote-as ${remoteAsn}${bgpDescLine}
+  address-family ipv4 unicast
+   send-community-ebgp
+   route-policy ${rpIn} in
+   route-policy ${rpOut} out
+   soft-reconfiguration inbound always
+  !
+ !`;
+          rollbackBgpBlocks.push(`router bgp ${localAsn}\n no neighbor ${peerIp}\n!`);
+        }
+
+        if (!uniqueInterfaces.has(subIf)) {
+          uniqueInterfaces.add(subIf);
+          rollbackInterfaceLines.push(`no interface ${subIf}\n!`);
+        }
+
+        rollbackRoutePolicyLines.push(`no route-policy ${rpIn}\n!`);
+
+        if (!uniquePolicyMaps.has(polIn)) {
+          uniquePolicyMaps.add(polIn);
+          rollbackPolicyMapLines.push(`no policy-map ${polIn}\n!`);
+        }
+
+        if (!uniquePolicyMaps.has(polOut)) {
+          uniquePolicyMaps.add(polOut);
+          rollbackPolicyMapLines.push(`no policy-map ${polOut}\n!`);
+        }
+
+        const serviceConfig = `policy-map ${polIn}
+ class class-default
+  police rate ${rateInVal} mbps 
+  ! 
+ ! 
+ end-policy-map
+! 
+policy-map ${polOut}
+ class class-default
+  shape average ${shapeOutVal} bps ${burstBytes} bytes 
+ ! 
+ end-policy-map
+! 
+
+interface ${subIf}${intDescLine}${vrfIntLine}
+ service-policy input ${polIn} 
+ service-policy output ${polOut}
+ ipv4 address ${localIp} ${mask}
+ encapsulation dot1q ${vlan}
+!
+
+route-policy ${rpIn}
+  set local-preference ${lp}
+  if destination in ${prefixSetName} then
+    pass
+  else
+    drop
+  endif
+end-policy
+!
+
+${bgpBlock}`;
+
+        configBlocks.push(serviceConfig);
+      });
+
+      if (currentTab === 'rollback') {
+        const rollbackParts = [
+          ...rollbackBgpBlocks,
+          ...rollbackInterfaceLines,
+          ...rollbackRoutePolicyLines,
+          ...rollbackPolicyMapLines
+        ];
+        if (prefixSetGenerated) {
+          rollbackParts.push(`no prefix-set ${prefixSetName}\n!`);
+        }
+        outputEl.textContent = rollbackParts.join('\n');
+        return;
+      }
+
+      outputEl.textContent = configBlocks.join('\n\n\n');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tabConfigOnly').classList.toggle('active', tab === 'config');
+      document.getElementById('tabRollback').classList.toggle('active', tab === 'rollback');
+      renderOutput();
+    }
+
+    function copyOutput() {
+      if (!hasAnyGenerated()) {
+        showToast('Click Generate first!');
+        return;
+      }
+      const text = document.getElementById('mopOutput').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Script copied to clipboard!');
+      });
+    }
+
+    function downloadMOP() {
+      if (!hasAnyGenerated()) {
+        showToast('Click Generate first!');
+        return;
+      }
+      const text = document.getElementById('mopOutput').textContent;
+      const prefixName = document.getElementById('prefixSetName').value.trim().replace(/-prefix$/i, '') || 'cisco-ncs';
+      const suffix = currentTab === 'rollback' ? 'ncs-rollback.txt' : 'ncs-config.txt';
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${prefixName}-${suffix}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded ${prefixName}-${suffix}`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function clearAll() {
+      document.getElementById('localAsn').value = '';
+      document.getElementById('remoteAsn').value = '';
+      document.getElementById('physInterface').value = '';
+      document.getElementById('baseVlan').value = '';
+      document.getElementById('prefixSetName').value = '';
+      document.getElementById('prefixList').value = '';
+      services = [];
+      prefixSetGenerated = false;
+      renderServices();
+      renderOutput();
+    }
+
+    function loadSampleData() {
+      document.getElementById('localAsn').value = '133443';
+      document.getElementById('remoteAsn').value = '65372';
+      document.getElementById('physInterface').value = 'HundredGigE0/0/0/29';
+      document.getElementById('baseVlan').value = '3541';
+      document.getElementById('prefixSetName').value = 'sph-dot-net-prefix';
+      document.getElementById('prefixList').value = '103.229.85.148/30\n151.158.121.8/30\n151.158.121.16/29';
+
+      const keys = ['INT', 'GGC', 'FNA', 'MCDN', 'BCDN', 'BDIX'];
+      services = keys.map((k, idx) => ({
+        ...SAMPLE_DATA[k],
+        id: idx + 1,
+        generated: false
+      }));
+      prefixSetGenerated = false;
+
+      renderServices();
+      renderOutput();
+      showToast('Sample loaded! Click Generate on each service.');
+    }
+
+    // Start completely clean with empty output box
+    clearAll();
+  </script>
+</body>
+</html>
